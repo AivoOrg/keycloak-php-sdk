@@ -281,12 +281,12 @@ class UserApi
      * @param string $id
      * @param array $body
      */
-    public function sendRequiredActionsEmail(string $id, array $body): void
+    public function sendRequiredActionsEmail(string $id, array $body, string $query = ''): void
     {
         $this->client
             ->sendRequest(
                 'PUT',
-                "users/$id/execute-actions-email",
+                "users/$id/execute-actions-email$query",
                 $body
             );
     }
