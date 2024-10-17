@@ -1,0 +1,45 @@
+version: '3.3'
+services:
+  db:
+    container_name: kc_db
+    volumes:
+      - '~/Projects/infra/conf/mysql/zzz-acsystems.cnf:/etc/mysql/mysql.conf.d/zzz-acsystems.cnf'
+      - mysqldatabase:/var/lib/mysql
+      - ./init.sql:/data/application/init.sql
+    ports:
+      - '3306:3306'
+    command: --init-file /data/application/init.sql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    restart: always
+    image: 'mysql:5.7.30'
+  mailcatcher:
+    container_name: kc_mailcatcher
+    ports:
+      - '1025:1025'
+      - '1080:1080'
+    restart: always
+    image: schickling/mailcatcher
+  keycloak:
+    container_name: kc_keycloak
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./scripts/disable-theme-cache.cli:/opt/jboss/startup-scripts/disable-theme-cache.cli
+    environment:
+      - KEYCLOAK_USER=keycloak
+      - KEYCLOAK_PASSWORD=keycloak
+      - DB_ADDR=db
+      - DB_VENDOR=MYSQL
+      - DB_DATABASE=keycloak
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - MYACTIONS_URL=https://localhost:3000/
+    links:
+      - db
+      - mailcatcher
+    image: jboss/keycloak:latest
+volumes:
+  mysqldatabase:
+    external:
+      name: mysqldatabase
